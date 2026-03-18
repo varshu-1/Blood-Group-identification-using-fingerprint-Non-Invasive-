@@ -36,6 +36,8 @@ Scikit-learn / TensorFlow / Keras
 
 Deployment (optional): Vercel / Flask / Streamlit
 
+
+
 ⚙️ How It Works:
 
 Input: Fingerprint image
@@ -52,10 +54,14 @@ Model Training: Machine learning algorithm trained on dataset
 
 Prediction: Blood group classification (A, B, AB, O)
 
+
+
 ⚠️ Disclaimer :
 
 This project is intended for educational and research purposes only.
 The predictions are not medically certified and should not be used for clinical or diagnostic decisions.
+
+
 
 🌟 Future Improvements :
 
@@ -66,6 +72,8 @@ Larger and more diverse dataset
 Real-time fingerprint scanner integration
 
 Mobile/web app deployment
+
+
 
 🤝 Contributing
 
