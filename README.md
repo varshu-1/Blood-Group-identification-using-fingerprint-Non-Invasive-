@@ -16,6 +16,7 @@ This project presents a non-invasive approach to blood group detection using fin
 🛠️ Tech Stack
 
 Programming Language: Python
+Datasets : https://drive.google.com/drive/folders/1oyosljvR1i3FvywPz7jE1l1qwYgnh6sX?usp=drive_link
 Libraries/Frameworks:
 OpenCV (Image Processing)
 NumPy, Pandas
