@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Fingerprint Blood Group Detection</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        medical: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        },
+                        teal: {
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            min-height: 100vh;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .upload-zone {
+            background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='16' ry='16' stroke='%23CBD5E1FF' stroke-width='2' stroke-dasharray='12%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+            transition: all 0.3s ease;
+        }
+
+        .upload-zone.dragover {
+            background-color: #f0f9ff;
+            background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='16' ry='16' stroke='%230EA5E9FF' stroke-width='2' stroke-dasharray='12%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+            transform: scale(1.01);
+        }
+
+        .fingerprint-scan {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #0ea5e9;
+            box-shadow: 0 0 15px #0ea5e9;
+            animation: scan 2s linear infinite;
+            display: none;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #e2e8f0;
+            border-bottom-color: #0ea5e9;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="text-slate-700 antialiased selection:bg-medical-500 selection:text-white">
+
+    <!-- Header -->
+    <header class="fixed top-0 w-full z-50 glass-panel shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-3">
+                    <div class="bg-gradient-to-tr from-medical-600 to-teal-400 p-2 rounded-lg text-white shadow-lg">
+                        <i class="fa-solid fa-fingerprint text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-xl text-slate-800 leading-tight">BioDetect AI</h1>
+                        <p class="text-xs text-slate-500 font-medium tracking-wide">BLOOD GROUP IDENTIFICATION</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-shield-halved text-teal-500"></i> HIPAA Compliant</span>
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-microchip text-medical-500"></i> ResNet-50 Powered</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen flex flex-col justify-center">
+        
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+            
+            <!-- Left Column: Intro & Info -->
+            <div class="space-y-6 animate-slide-up">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wider border border-blue-100">
+                    <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                    AI Model v2.0 Ready
+                </div>
+                <h2 class="text-4xl lg:text-5xl font-bold text-slate-900 leading-tight">
+                    Instant Blood Group <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-medical-600 to-teal-400">Detection via Fingerprint</span>
+                </h2>
+                <p class="text-lg text-slate-600 leading-relaxed">
+                    Upload a high-resolution fingerprint image to our deep learning system. Our ResNet model analyzes ridge patterns to predict blood group with high accuracy.
+                </p>
+                
+                <div class="grid grid-cols-2 gap-4 pt-4">
+                    <div class="p-4 bg-white rounded-xl shadow-sm border border-slate-100 flex items-start gap-3">
+                        <div class="bg-green-100 p-2 rounded-lg text-green-600">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800">Fast Analysis</h4>
+                            <p class="text-sm text-slate-500">Results in < 2 seconds</p>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-white rounded-xl shadow-sm border border-slate-100 flex items-start gap-3">
+                        <div class="bg-indigo-100 p-2 rounded-lg text-indigo-600">
+                            <i class="fa-solid fa-bullseye"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800">High Accuracy</h4>
+                            <p class="text-sm text-slate-500">98.5% Precision</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Upload Interface -->
+            <div class="glass-panel rounded-2xl p-6 shadow-xl border border-white/50 animate-fade-in relative">
+                
+                <!-- Card Header -->
+                <div class="mb-6 border-b border-slate-100 pb-4">
+                    <h3 class="text-xl font-bold text-slate-800">Fingerprint Analysis</h3>
+                    <p class="text-sm text-slate-500">Supported formats: JPG, PNG, BMP</p>
+                </div>
+
+                <!-- Alert Box (Error) -->
+                <div id="error-alert" class="hidden mb-4 p-4 rounded-lg bg-red-50 border border-red-100 text-red-700 text-sm flex items-center gap-3">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span id="error-message">Error message goes here.</span>
+                </div>
+
+                <!-- Upload Area -->
+                <div id="drop-zone" class="upload-zone rounded-xl h-64 flex flex-col items-center justify-center cursor-pointer relative group">
+                    <input type="file" id="file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/png, image/jpeg, image/jpg, image/bmp">
+                    
+                    <!-- Placeholder Content -->
+                    <div id="upload-placeholder" class="text-center p-6 transition-opacity duration-300">
+                        <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
+                        </div>
+                        <p class="text-slate-700 font-medium mb-1">Click or drag image here</p>
+                        <p class="text-slate-400 text-sm">Max file size 5MB</p>
+                    </div>
+
+                    <!-- Image Preview -->
+                    <div id="preview-container" class="hidden absolute inset-2 bg-slate-900 rounded-lg overflow-hidden fingerprint-scan">
+                        <img id="image-preview" src="" alt="Preview" class="w-full h-full object-contain opacity-80">
+                        <div id="scan-line" class="scan-line"></div>
+                        <button id="remove-image" class="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full hover:bg-red-600 transition shadow-lg z-10 flex items-center justify-center">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <button id="predict-btn" disabled class="w-full mt-6 py-4 rounded-xl bg-gradient-to-r from-medical-600 to-teal-500 text-white font-bold text-lg shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-blue-500/50 hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-3">
+                    <span id="btn-text">Analyze Fingerprint</span>
+                    <span id="btn-loader" class="hidden loader w-5 h-5 border-2 border-white/30 border-b-white"></span>
+                </button>
+
+            </div>
+        </div>
+
+        <!-- Result Section (Modal/Overlay Style injected into DOM) -->
+        <div id="result-section" class="hidden mt-12 animate-slide-up">
+            <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+                <div class="bg-slate-800 p-4 flex justify-between items-center">
+                    <h3 class="text-white font-medium flex items-center gap-2">
+                        <i class="fa-solid fa-file-medical"></i> Medical Report
+                    </h3>
+                    <span class="text-slate-400 text-xs" id="report-date"></span>
+                </div>
+                
+                <div class="p-8 grid md:grid-cols-2 gap-8 items-center">
+                    <!-- Visual Representation -->
+                    <div class="flex flex-col items-center justify-center border-r border-slate-100 pr-0 md:pr-8">
+                        <div class="relative w-32 h-40">
+                            <div class="absolute inset-0 bg-red-100 rounded-full blur-xl opacity-50 animate-pulse-slow"></div>
+                            <!-- Blood Drop Shape -->
+                            <svg viewBox="0 0 24 24" class="w-full h-full text-red-600 drop-shadow-xl filter" fill="currentColor">
+                                <path d="M12 2C12 2 4 10.8 4 15.2C4 19.5 7.6 23 12 23C16.4 23 20 19.5 20 15.2C20 10.8 12 2 12 2Z" />
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center pt-4">
+                                <span id="result-group" class="text-4xl font-bold text-white">A+</span>
+                            </div>
+                        </div>
+                        <p class="mt-4 text-slate-500 font-medium text-sm uppercase tracking-wide">Predicted Blood Group</p>
+                    </div>
+
+                    <!-- Details -->
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="text-slate-600 font-medium">Model Confidence</span>
+                                <span id="result-confidence" class="text-2xl font-bold text-teal-600">98.2%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-3">
+                                <div id="confidence-bar" class="bg-gradient-to-r from-medical-500 to-teal-400 h-3 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                            <h5 class="text-blue-800 font-bold text-sm mb-2"><i class="fa-solid fa-circle-info mr-2"></i>Analysis Summary</h5>
+                            <p class="text-blue-700 text-sm leading-relaxed">
+                                The ResNet-50 model has detected patterns consistent with blood group <span id="summary-group" class="font-bold">A+</span> based on the ridge characteristics of the uploaded fingerprint.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-50 p-4 text-center border-t border-slate-100">
+                    <button onclick="window.location.reload()" class="text-slate-500 hover:text-medical-600 text-sm font-medium transition-colors">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> Analyze Another Image
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-slate-400 text-sm">© 2023 Medical AI Systems. For research purposes only.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropZone = document.getElementById('drop-zone');
+            const fileInput = document.getElementById('file-input');
+            const previewContainer = document.getElementById('preview-container');
+            const imagePreview = document.getElementById('image-preview');
+            const uploadPlaceholder = document.getElementById('upload-placeholder');
+            const removeBtn = document.getElementById('remove-image');
+            const predictBtn = document.getElementById('predict-btn');
+            const btnText = document.getElementById('btn-text');
+            const btnLoader = document.getElementById('btn-loader');
+            const scanLine = document.getElementById('scan-line');
+            const errorAlert = document.getElementById('error-alert');
+            const resultSection = document.getElementById('result-section');
+            const reportDate = document.getElementById('report-date');
+
+            let selectedFile = null;
+
+            // --- Drag & Drop Handlers ---
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+            });
+
+            dropZone.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files);
+            }
+
+            // --- File Input Handlers ---
+            fileInput.addEventListener('change', function() {
+                handleFiles(this.files);
+            });
+
+            function handleFiles(files) {
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (validateFile(file)) {
+                        selectedFile = file;
+                        previewFile(file);
+                        hideError();
+                        predictBtn.disabled = false;
+                    }
+                }
+            }
+
+            function validateFile(file) {
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/bmp'];
+                if (!validTypes.includes(file.type)) {
+                    showError("Invalid file type. Please upload JPG, PNG, or BMP.");
+                    return false;
+                }
+                if (file.size > 5 * 1024 * 1024) { // 5MB
+                    showError("File size too large. Max 5MB allowed.");
+                    return false;
+                }
+                return true;
+            }
+
+            function previewFile(file) {
+                const reader = new FileReader();
+                reader.onloadend = function() {
+                    imagePreview.src = reader.result;
+                    uploadPlaceholder.classList.add('hidden');
+                    previewContainer.classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+
+            // --- UI Helper Functions ---
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent opening file dialog
+                resetUpload();
+            });
+
+            function resetUpload() {
+                selectedFile = null;
+                fileInput.value = '';
+                previewContainer.classList.add('hidden');
+                uploadPlaceholder.classList.remove('hidden');
+                predictBtn.disabled = true;
+                resultSection.classList.add('hidden');
+                hideError();
+            }
+
+            function showError(msg) {
+                const msgSpan = document.getElementById('error-message');
+                msgSpan.textContent = msg;
+                errorAlert.classList.remove('hidden');
+            }
+
+            function hideError() {
+                errorAlert.classList.add('hidden');
+            }
+
+            // --- Prediction Logic ---
+            predictBtn.addEventListener('click', async () => {
+    if (!selectedFile) return;
+
+    predictBtn.disabled = true;
+    btnText.textContent = "Processing...";
+    btnLoader.classList.remove('hidden');
+    scanLine.style.display = 'block';
+    resultSection.classList.add('hidden');
+
+    try {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        const response = await fetch('/predict', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error("Prediction failed");
+        }
+
+        const data = await response.json();
+
+        // 🔥 REAL MODEL OUTPUT
+        displayResult(data.label, data.confidence);
+
+    } catch (error) {
+        showError("Backend error. Check Flask console.");
+        console.error(error);
+
+    } finally {
+        btnText.textContent = "Analyze Fingerprint";
+        btnLoader.classList.add('hidden');
+        scanLine.style.display = 'none';
+        predictBtn.disabled = false;
+    }
+});
+
+
+            function displayResult(label, confidence) {
+                // Populate data
+                document.getElementById('result-group').textContent = label;
+                document.getElementById('summary-group').textContent = label;
+                document.getElementById('result-confidence').textContent = confidence + '%';
+                
+                const now = new Date();
+                reportDate.textContent = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+
+                // Show Section
+                resultSection.classList.remove('hidden');
+                
+                // Animate Bar
+                setTimeout(() => {
+                    document.getElementById('confidence-bar').style.width = confidence + '%';
+                }, 100);
+
+                // Scroll to result
+                resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    </script>
+</body>
+</html>
